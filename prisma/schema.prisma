@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  password          String
+  name              String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  isActive          Boolean   @default(true)
+  lastLoginAt       DateTime?
+  monthlyIncome     Float?
+  paymentFrequency  String?
+  riskTolerance     String?
+  subscription      Subscription?
+  transactions      Transaction[]
+  goals             Goal[]
+  analytics         UserAnalytics?
+  socialPreferences SocialPreferences?
+  notifications     Notification[]
+}
+
+model Subscription {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id])
+  planId        String
+  status        String
+  startDate     DateTime  @default(now())
+  endDate       DateTime?
+  stripeId      String?
+  cancelledAt   DateTime?
+  trialEndsAt   DateTime?
+}
+
+model Transaction {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  type        String
+  amount      Float
+  category    String
+  description String?
+  date        DateTime  @default(now())
+}
+
+model Goal {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  name        String
+  target      Float
+  current     Float     @default(0)
+  deadline    DateTime
+  category    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model UserAnalytics {
+  id                    String    @id @default(cuid())
+  userId               String    @unique
+  user                 User      @relation(fields: [userId], references: [id])
+  lastActive           DateTime  @default(now())
+  sessionCount         Int       @default(0)
+  totalTransactions    Int       @default(0)
+  savingsRate          Float?
+  avgMonthlySpending   Float?
+  mostUsedCategories   String[]
+  deviceInfo           Json?
+  features             UserFeatureUsage?
+}
+
+model UserFeatureUsage {
+  id                String        @id @default(cuid())
+  analyticsId      String        @unique
+  analytics        UserAnalytics @relation(fields: [analyticsId], references: [id])
+  budgetingUsage   Int           @default(0)
+  goalTracking     Int           @default(0)
+  socialFeatures   Int           @default(0)
+  aiAssistant      Int           @default(0)
+  lastUsedFeatures DateTime[]
+}
+
+model SocialPreferences {
+  id              String  @id @default(cuid())
+  userId          String  @unique
+  user            User    @relation(fields: [userId], references: [id])
+  shareProgress   Boolean @default(false)
+  joinGroups      Boolean @default(false)
+  competitiveMode Boolean @default(false)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AdminMetrics {
+  id                    String   @id @default(cuid())
+  date                  DateTime @default(now())
+  totalUsers            Int      @default(0)
+  activeUsers           Int      @default(0)
+  paidSubscriptions     Int      @default(0)
+  monthlyRecurringRevenue Float   @default(0)
+  churnRate             Float?
+  userGrowthRate        Float?
+  avgUserLifetime       Float?
+}

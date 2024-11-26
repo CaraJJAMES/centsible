@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@layer base {
+  input {
+    @apply transition-all duration-200;
+  }
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, #fae8ff 0%, #ede9fe 50%, #dbeafe 100%);
+}
